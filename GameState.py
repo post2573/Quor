@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-# coding: utf-8
-
-# In[33]:
-
 
 import numpy as np
 
@@ -25,11 +21,3 @@ class GameState():
         def placePlayer(self, row, column):
             self.player = np.zeros((9,9))
             self.player[row][column] = 1
-        
-
-
-# In[ ]:
-
-
-
-
