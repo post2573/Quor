@@ -21,3 +21,6 @@ class GameState():
         def placePlayer(self, row, column):
             self.player = np.zeros((9,9))
             self.player[row][column] = 1
+        def placePlayer2(self, row, column):
+            self.player2 = np.zeros((9,9))
+            self.player2[row][column] = 1
