@@ -27,10 +27,10 @@ class GameState():
         self.numPlayerWalls = 10;
         self.numPlayer2Walls = 10;
         
-    def getNumPlayerWalls():
+    def getNumPlayerWalls(self):
         return self.numPlayerWalls;
     
-    def getNumPlayer2Walls():
+    def getNumPlayer2Walls(self):
         return self.numPlayer2Walls;
     
     def getWallMatrices(self, player):
@@ -41,7 +41,7 @@ class GameState():
                     result.append(np.ones((9,9)))
                 else:
                     result.append(np.zeros((9,9)))
-        else if(player == 2):
+        elif(player == 2):
             for i in range(10):
                 if(i < self.numPlayer2Walls):
                     result.append(np.ones((9,9)))
@@ -99,10 +99,52 @@ class GameState():
 
     #send in a round of moves (e.g. 1.e8 e2) 
     def makeMoves(self, move):
-            moves = re.split(" .", move)
-            makemove(self, 1, moves[1])
-            makemove(self, 2, moves[2])
+        moves = re.split(" .", move)
+        makePlayerMove(self, moves[1])
+        makePlayer2Move(self, moves[2])
             
+    def makePlayerMove(self, playerMove):
+        #if pawn move
+        if(len(playerMove) == 2):
+            if(playerMove[0] == 'a'):
+                placePlayer(self, playerMove[1], 0)
+            if(playerMove[0] == 'b'):
+                placePlayer(self, playerMove[1], 1)
+            if(playerMove[0] == 'c'):
+                placePlayer(self, playerMove[1], 2) 
+            if(playerMove[0] == 'd'):
+                placePlayer(self, playerMove[1], 3)
+            if(playerMove[0] == 'e'):
+                placePlayer(self, playerMove[1], 4)
+            if(playerMove[0] == 'f'):
+                placePlayer(self, playerMove[1], 5)
+            if(playerMove[0] == 'g'):
+                placePlayer(self, playerMove[1], 6)
+            if(playerMove[0] == 'h'):
+                placePlayer(self, playerMove[1], 7)
+            if(playerMove[0] == 'i'):
+                placePlayer(self, playerMove[1], 8)
+        #if wall placement
+        elif(len(playerMove) == 3):
+            if(playerMove[0] == 'a'):
+                addPlayerWall(self, playerMove[1], 0, playerMove[2])
+            if(playerMove[0] == 'b'):
+                addPlayerWall(self, playerMove[1], 1, playerMove[2])
+            if(playerMove[0] == 'c'):
+                addPlayerWall(self, playerMove[1], 2, playerMove[2]) 
+            if(playerMove[0] == 'd'):
+                addPlayerWall(self, playerMove[1], 3, playerMove[2])
+            if(playerMove[0] == 'e'):
+                addPlayerWall(self, playerMove[1], 4, playerMove[2])
+            if(playerMove[0] == 'f'):
+                addPlayerWall(self, playerMove[1], 5, playerMove[2])
+            if(playerMove[0] == 'g'):
+                addPlayerWall(self, playerMove[1], 6, playerMove[2])
+            if(playerMove[0] == 'h'):
+                addPlayerWall(self, playerMove[1], 7, playerMove[2])
+            if(playerMove[0] == 'i'):
+                addPlayerWall(self, playerMove[1], 8, playerMove[2])
+       
 '''
     #figure out how to categorize legal moves
     def isLegalMove(self):
