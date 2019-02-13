@@ -63,32 +63,38 @@ class GameState():
         return self.h_walls
     
     def addPlayerWall(self, row, column, direction):
+        if (row == 0 or column == 0):
+            print("Invalid wall position.")
+            return
         if (direction == 'v'):
             self.v_walls[row][column] = 1
         if (direction == 'h'):
             self.h_walls[row][column] = 1
         #if there is a wall to use, make it unuseable
-        if(isPlayerWallsLeft(self)):
+        if(self.isPlayerWallsLeft()):
             self.numPlayerWalls = self.numPlayerWalls -1
             
     def addPlayer2Wall(self, row, column, direction):
+        if (row == 0 or column == 0):
+            print("Invalid wall position.")
+            return
         if (direction == 'v'):
             self.v_walls[row][column] = 1
         if (direction == 'h'):
             self.h_walls[row][column] = 1
        #if there is a wall to use, make it unuseable
-        if(isPlayer2WallsLeft(self)):
+        if(self.isPlayer2WallsLeft()):
             self.numPlayer2Walls = self.numPlayer2Walls -1
             
     def isPlayerWallsLeft(self):
         if(self.numPlayerWalls > 0):
-           return true
-        return false
+           return True
+        return False
     
     def isPlayer2WallsLeft(self):
         if(self.numPlayer2Walls > 0):
-           return true
-        return false
+           return True
+        return False
     
     #returns numpy array of where the white pawn is located
     def getPlayerMatrix(self):
@@ -104,101 +110,106 @@ class GameState():
 
     #send in a round of moves (e.g. 1.e8 e2) 
     def makeMoves(self, move):
-        moves = re.split(" .", move)
-        findPlayerMove(self, moves[1])
-        findPlayer2Move(self, moves[2])
+        moves = move.replace('.',' ').split()
+        print(moves)
+        self.findPlayerMove(moves[1])
+        self.findPlayer2Move(moves[2])
             
     def findPlayerMove(self, playerMove):
         #if pawn move
         if(len(playerMove) == 2):
             if(playerMove[0] == 'a'):
-                placePlayer(self, playerMove[1], 0)
-            if(playerMove[0] == 'b'):
-                placePlayer(self, playerMove[1], 1)
-            if(playerMove[0] == 'c'):
-                placePlayer(self, playerMove[1], 2) 
-            if(playerMove[0] == 'd'):
-                placePlayer(self, playerMove[1], 3)
-            if(playerMove[0] == 'e'):
-                placePlayer(self, playerMove[1], 4)
-            if(playerMove[0] == 'f'):
-                placePlayer(self, playerMove[1], 5)
-            if(playerMove[0] == 'g'):
-                placePlayer(self, playerMove[1], 6)
-            if(playerMove[0] == 'h'):
-                placePlayer(self, playerMove[1], 7)
-            if(playerMove[0] == 'i'):
-                placePlayer(self, playerMove[1], 8)
+                self.placePlayer(int(playerMove[1])-1, 0)
+            elif(playerMove[0] == 'b'):
+                self.placePlayer(int(playerMove[1])-1, 1)
+            elif(playerMove[0] == 'c'):
+                self.placePlayer(int(playerMove[1])-1, 2) 
+            elif(playerMove[0] == 'd'):
+                self.placePlayer(int(playerMove[1])-1, 3)
+            elif(playerMove[0] == 'e'):
+                self.placePlayer(int(playerMove[1])-1, 4)
+            elif(playerMove[0] == 'f'):
+                self.placePlayer(int(playerMove[1])-1, 5)
+            elif(playerMove[0] == 'g'):
+                self.placePlayer(int(playerMove[1])-1, 6)
+            elif(playerMove[0] == 'h'):
+                self.placePlayer(int(playerMove[1])-1, 7)
+            elif(playerMove[0] == 'i'):
+                self.placePlayer(int(playerMove[1])-1, 8)
         #if wall placement
         elif(len(playerMove) == 3):
             if(playerMove[0] == 'a'):
-                addPlayerWall(self, playerMove[1], 0, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 0, playerMove[2])
             if(playerMove[0] == 'b'):
-                addPlayerWall(self, playerMove[1], 1, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 1, playerMove[2])
             if(playerMove[0] == 'c'):
-                addPlayerWall(self, playerMove[1], 2, playerMove[2]) 
+                self.addPlayerWall(int(playerMove[1])-1, 2, playerMove[2]) 
             if(playerMove[0] == 'd'):
-                addPlayerWall(self, playerMove[1], 3, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 3, playerMove[2])
             if(playerMove[0] == 'e'):
-                addPlayerWall(self, playerMove[1], 4, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 4, playerMove[2])
             if(playerMove[0] == 'f'):
-                addPlayerWall(self, playerMove[1], 5, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 5, playerMove[2])
             if(playerMove[0] == 'g'):
-                addPlayerWall(self, playerMove[1], 6, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 6, playerMove[2])
             if(playerMove[0] == 'h'):
-                addPlayerWall(self, playerMove[1], 7, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 7, playerMove[2])
             if(playerMove[0] == 'i'):
-                addPlayerWall(self, playerMove[1], 8, playerMove[2])
+                self.addPlayerWall(int(playerMove[1])-1, 8, playerMove[2])
                 
     def findPlayer2Move(self, playerMove):
         #if pawn move
         if(len(playerMove) == 2):
             if(playerMove[0] == 'a'):
-                placePlayer2(self, playerMove[1], 0)
-            if(playerMove[0] == 'b'):
-                placePlayer2(self, playerMove[1], 1)
-            if(playerMove[0] == 'c'):
-                placePlayer2(self, playerMove[1], 2) 
-            if(playerMove[0] == 'd'):
-                placePlayer2(self, playerMove[1], 3)
-            if(playerMove[0] == 'e'):
-                placePlayer2(self, playerMove[1], 4)
-            if(playerMove[0] == 'f'):
-                placePlayer2(self, playerMove[1], 5)
-            if(playerMove[0] == 'g'):
-                placePlayer2(self, playerMove[1], 6)
-            if(playerMove[0] == 'h'):
-                placePlayer2(self, playerMove[1], 7)
-            if(playerMove[0] == 'i'):
-                placePlayer2(self, playerMove[1], 8)
+                self.placePlayer2(int(playerMove[1])-1, 0)
+            elif(playerMove[0] == 'b'):
+                self.placePlayer2(int(playerMove[1])-1, 1)
+            elif(playerMove[0] == 'c'):
+                self.placePlayer2(int(playerMove[1])-1, 2) 
+            elif(playerMove[0] == 'd'):
+                self.placePlayer2(int(playerMove[1])-1, 3)
+            elif(playerMove[0] == 'e'):
+                self.placePlayer2(int(playerMove[1])-1, 4)
+            elif(playerMove[0] == 'f'):
+                self.placePlayer2(int(playerMove[1])-1, 5)
+            elif(playerMove[0] == 'g'):
+                self.placePlayer2(int(playerMove[1])-1, 6)
+            elif(playerMove[0] == 'h'):
+                self.placePlayer2(int(playerMove[1])-1, 7)
+            elif(playerMove[0] == 'i'):
+                self.placePlayer2(int(playerMove[1])-1, 8)
         #if wall placement
         elif(len(playerMove) == 3):
             if(playerMove[0] == 'a'):
-                addPlayer2Wall(self, playerMove[1], 0, playerMove[2])
+                self.addPlayer2Wall(int(playerMove[1])-1, 0, playerMove[2])
             if(playerMove[0] == 'b'):
-                addPlayer2Wall(self, playerMove[1], 1, playerMove[2])
+                self.addPlayer2Wall(int(playerMove[1])-1, 1, playerMove[2])
             if(playerMove[0] == 'c'):
-                addPlayer2Wall(self, playerMove[1], 2, playerMove[2]) 
+                self.addPlayer2Wall(int(playerMove[1])-1, 2, playerMove[2]) 
             if(playerMove[0] == 'd'):
-                addPlayer2Wall(self, playerMove[1], 3, playerMove[2])
+                self.addPlayer2Wall(int(playerMove[1])-1, 3, playerMove[2])
             if(playerMove[0] == 'e'):
-                addPlayer2Wall(self, playerMove[1], 4, playerMove[2])
+                self.addPlayer2Wall(int(playerMove[1])-1, 4, playerMove[2])
             if(playerMove[0] == 'f'):
-                addPlayer2Wall(self, playerMove[1], 5, playerMove[2])
+                self.addPlayer2Wall(int(playerMove[1])-1, 5, playerMove[2])
             if(playerMove[0] == 'g'):
-                addPlayer2Wall(self, playerMove[1], 6, playerMove[2])
+                self.addPlayer2Wall(int(playerMove[1])-1, 6, playerMove[2])
             if(playerMove[0] == 'h'):
-                addPlayer2Wall(self, playerMove[1], 7, playerMove[2])
+                self.addPlayer2Wall(int(playerMove[1])-1, 7, playerMove[2])
             if(playerMove[0] == 'i'):
-                addPlayer2Wall(self, playerMove[1], 8, playerMove[2])
-                
+                self.addPlayer2Wall(int(playerMove[1])-1, 8, playerMove[2])
     #needs to return a list of all the numpy arrays           
     def getAllMatrices(self):
         result = []
-        result.append(self.getPlayerMatrix(self))
-        result.append(self.getPlayer2Matrix(self))
-        result.append(self.getVerticalWallMatrix(self))
-        result.append(self.getHorizontalWallMatrix(self))
+        result.append(self.getPlayerMatrix())
+        result.append(self.getPlayer2Matrix())
+        result.append(self.getVerticalWallMatrix())
+        result.append(self.getHorizontalWallMatrix())
+        return result
+   
+    def getGameState(self):
+        result = np.array
+        listOfMatrices = getAllMatrices(self)
         
         
     #needs to return a numpy array of 209 possible moves, marked by 1 meaning valid and 0 meaning invalid
