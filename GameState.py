@@ -9,9 +9,9 @@ class GameState():
     
     def __init__(self):
         #matrix for horiztontal walls
-        self.h_walls = np.zeros( (9, 9) )
+        self.h_walls = np.zeros( (9, 9), dtype=int )
         #matrix for vertical walls
-        self.v_walls = np.zeros( (9, 9) )
+        self.v_walls = np.zeros( (9, 9), dtype=int )
         #white pawn tuple
         self.player = (0,4)
         #black pawn tuple
@@ -35,19 +35,29 @@ class GameState():
     
     #output of 10 matrices. Matrices of all 1s mean they exist, Matrices of all 0s means they've been used.
     def getWallMatrices(self, player):
-        result = [];
+        result = []
         if(player == 1):
             for i in range(10):
                 if(i < self.numPlayerWalls):
-                    result.append(np.ones((9,9)))
+                    wall = np.ones((9,9), dtype=int)
+                    #put 0s where invalid wall placement
+                    for j in range(9):
+                        wall[0][j] = 0;
+                        wall[j][0] = 0;
+                    result.append(wall)
                 else:
-                    result.append(np.zeros((9,9)))
+                    result.append(np.zeros((9,9), dtype=int))
         elif(player == 2):
             for i in range(10):
                 if(i < self.numPlayer2Walls):
-                    result.append(np.ones((9,9)))
+                    wall = np.ones((9,9), dtype=int)
+                    #put 0s where invalid wall placement
+                    for j in range(9):
+                        wall[0][j] = 0;
+                        wall[j][0] = 0;
+                    result.append(wall)
                 else:
-                    result.append(np.zeros((9,9)))
+                    result.append(np.zeros((9,9), dtype=int))
         return result
 
     def placePlayer(self, row, column):
@@ -98,13 +108,13 @@ class GameState():
     
     #returns numpy array of where the white pawn is located
     def getPlayerMatrix(self):
-        white = np.zeros( (9, 9) )
+        white = np.zeros( (9, 9), dtype=int )
         white[self.player[0]][self.player[1]] = 1
         return white;
     
     #returns numpy array of where the black pawn is located
     def getPlayer2Matrix(self):
-        black = np.zeros( (9, 9) )
+        black = np.zeros( (9, 9), dtype=int )
         black[self.player2[0]][self.player2[1]] = 1
         return black;
 
@@ -116,88 +126,23 @@ class GameState():
         self.findPlayer2Move(moves[2])
             
     def findPlayerMove(self, playerMove):
+        moveMap = {'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7,'i':8}
         #if pawn move
         if(len(playerMove) == 2):
-            if(playerMove[0] == 'a'):
-                self.placePlayer(int(playerMove[1])-1, 0)
-            elif(playerMove[0] == 'b'):
-                self.placePlayer(int(playerMove[1])-1, 1)
-            elif(playerMove[0] == 'c'):
-                self.placePlayer(int(playerMove[1])-1, 2) 
-            elif(playerMove[0] == 'd'):
-                self.placePlayer(int(playerMove[1])-1, 3)
-            elif(playerMove[0] == 'e'):
-                self.placePlayer(int(playerMove[1])-1, 4)
-            elif(playerMove[0] == 'f'):
-                self.placePlayer(int(playerMove[1])-1, 5)
-            elif(playerMove[0] == 'g'):
-                self.placePlayer(int(playerMove[1])-1, 6)
-            elif(playerMove[0] == 'h'):
-                self.placePlayer(int(playerMove[1])-1, 7)
-            elif(playerMove[0] == 'i'):
-                self.placePlayer(int(playerMove[1])-1, 8)
+            self.placePlayer(int(playerMove[1])-1, moveMap[playerMove[0]])
         #if wall placement
         elif(len(playerMove) == 3):
-            if(playerMove[0] == 'a'):
-                self.addPlayerWall(int(playerMove[1])-1, 0, playerMove[2])
-            if(playerMove[0] == 'b'):
-                self.addPlayerWall(int(playerMove[1])-1, 1, playerMove[2])
-            if(playerMove[0] == 'c'):
-                self.addPlayerWall(int(playerMove[1])-1, 2, playerMove[2]) 
-            if(playerMove[0] == 'd'):
-                self.addPlayerWall(int(playerMove[1])-1, 3, playerMove[2])
-            if(playerMove[0] == 'e'):
-                self.addPlayerWall(int(playerMove[1])-1, 4, playerMove[2])
-            if(playerMove[0] == 'f'):
-                self.addPlayerWall(int(playerMove[1])-1, 5, playerMove[2])
-            if(playerMove[0] == 'g'):
-                self.addPlayerWall(int(playerMove[1])-1, 6, playerMove[2])
-            if(playerMove[0] == 'h'):
-                self.addPlayerWall(int(playerMove[1])-1, 7, playerMove[2])
-            if(playerMove[0] == 'i'):
-                self.addPlayerWall(int(playerMove[1])-1, 8, playerMove[2])
-                
+            self.addPlayerWall(int(playerMove[1])-1, moveMap[playerMove[0]], playerMove[2])
+           
     def findPlayer2Move(self, playerMove):
+        moveMap = {'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7,'i':8}
         #if pawn move
         if(len(playerMove) == 2):
-            if(playerMove[0] == 'a'):
-                self.placePlayer2(int(playerMove[1])-1, 0)
-            elif(playerMove[0] == 'b'):
-                self.placePlayer2(int(playerMove[1])-1, 1)
-            elif(playerMove[0] == 'c'):
-                self.placePlayer2(int(playerMove[1])-1, 2) 
-            elif(playerMove[0] == 'd'):
-                self.placePlayer2(int(playerMove[1])-1, 3)
-            elif(playerMove[0] == 'e'):
-                self.placePlayer2(int(playerMove[1])-1, 4)
-            elif(playerMove[0] == 'f'):
-                self.placePlayer2(int(playerMove[1])-1, 5)
-            elif(playerMove[0] == 'g'):
-                self.placePlayer2(int(playerMove[1])-1, 6)
-            elif(playerMove[0] == 'h'):
-                self.placePlayer2(int(playerMove[1])-1, 7)
-            elif(playerMove[0] == 'i'):
-                self.placePlayer2(int(playerMove[1])-1, 8)
+             self.placePlayer2(int(playerMove[1])-1, moveMap[playerMove[0]])
         #if wall placement
         elif(len(playerMove) == 3):
-            if(playerMove[0] == 'a'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 0, playerMove[2])
-            if(playerMove[0] == 'b'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 1, playerMove[2])
-            if(playerMove[0] == 'c'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 2, playerMove[2]) 
-            if(playerMove[0] == 'd'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 3, playerMove[2])
-            if(playerMove[0] == 'e'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 4, playerMove[2])
-            if(playerMove[0] == 'f'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 5, playerMove[2])
-            if(playerMove[0] == 'g'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 6, playerMove[2])
-            if(playerMove[0] == 'h'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 7, playerMove[2])
-            if(playerMove[0] == 'i'):
-                self.addPlayer2Wall(int(playerMove[1])-1, 8, playerMove[2])
+            self.addPlayer2Wall(int(playerMove[1])-1, moveMap[playerMove[0]], playerMove[2])
+            
     #needs to return a list of all the numpy arrays           
     def getAllMatrices(self):
         result = []
@@ -205,12 +150,50 @@ class GameState():
         result.append(self.getPlayer2Matrix())
         result.append(self.getVerticalWallMatrix())
         result.append(self.getHorizontalWallMatrix())
+        result.append(self.getWallMatrices(1))
+        result.append(self.getWallMatrices(2))
         return result
-   
+   '''
     def getGameState(self):
         result = np.array
         listOfMatrices = getAllMatrices(self)
+   '''     
         
+    def shiftdown9x9(self, mat):
+        return np.append(np.zeros((1,9), dtype=int), mat[0:8,:], 0)
+
+    def shiftup9x9(self, mat):
+        return np.append(mat[1:,:], np.zeros((1,9), dtype=int), 0)
+
+    def shiftleft9x9(self, mat):
+        return np.append(mat[:,1:], np.zeros((9,1), dtype=int), 1)
+
+    def shiftright9x9(self, mat):
+        return np.append(np.zeros((9,1), dtype=int), mat[:, 0:8], 1)
+
+    def bfs(self, starting, h_walls, v_walls):
+        curr_state = np.copy(starting)==1
+        while (True):
+            canGoUp = np.logical_not(np.logical_or(h_walls, self.shiftleft9x9(h_walls)))
+            canGoDown = np.logical_not(np.logical_or(self.shiftup9x9(h_walls), self.shiftup9x9(self.shiftleft9x9(h_walls))))
+            canGoLeft = np.logical_not(np.logical_or(v_walls, self.shiftup9x9(v_walls)))
+            canGoRight = np.logical_not(np.logical_or(self.shiftleft9x9(v_walls), self.shiftleft9x9(self.shiftup9x9(v_walls))))
+            next_state = np.copy(curr_state)
+            #update up
+            next_state = np.logical_or(next_state, self.shiftup9x9(np.logical_and(canGoUp, curr_state)))
+            #update down
+            next_state = np.logical_or(next_state, self.shiftdown9x9(np.logical_and(canGoDown, curr_state)))
+            #update left
+            next_state = np.logical_or(next_state, self.shiftleft9x9(np.logical_and(canGoLeft, curr_state)))
+            #update right
+            next_state = np.logical_or(next_state, self.shiftright9x9(np.logical_and(canGoRight, curr_state)))
+
+            print("next state is ")
+            print(next_state)
+            if (np.array_equal(next_state, curr_state)):
+                return next_state*1
+            curr_state = next_state
+
         
     #needs to return a numpy array of 209 possible moves, marked by 1 meaning valid and 0 meaning invalid
     #def findValidMoves(self):
