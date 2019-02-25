@@ -27,6 +27,27 @@ class GameState():
         self.numPlayerWalls = 10;
         self.numPlayer2Walls = 10;
         
+    def seeOtherPlayersPerspective(self):
+        return np.rot90(self.getPlayerMatrix(), 2)
+    
+    def seeV_WallsFlipped(self):
+        #rotate the existing matrix and shift to the right and then down
+        rot = np.rot90(self.getVerticalWallMatrix(), 2)
+        #y = np.argwhere(rot==1)
+        #print(y)
+        rot = self.shiftright9x9(rot)
+        rot = self.shiftdown9x9(rot)
+        return rot
+    
+    def seeH_WallsFlipped(self):
+        #rotate the existing matrix and shift to the right and then down
+        rot = np.rot90(self.getHorizontalWallMatrix(), 2)
+        #y = np.argwhere(rot==1)
+        #print(y)
+        rot = self.shiftright9x9(rot)
+        rot = self.shiftdown9x9(rot)
+        return rot
+    
     def getNumPlayerWalls(self):
         return self.numPlayerWalls;
     
@@ -76,6 +97,8 @@ class GameState():
         if (row == 0 or column == 0):
             print("Invalid wall position.")
             return
+        #NEED TO CHECK WHETHER WALL PLACEMENT IS VALID 
+            #NO OVERLAPPING WALLS AND NO TRAPPING THE OTHER PLAYER COMPLETELY
         if (direction == 'v'):
             self.v_walls[row][column] = 1
         if (direction == 'h'):
@@ -153,11 +176,7 @@ class GameState():
         result.append(self.getWallMatrices(1))
         result.append(self.getWallMatrices(2))
         return result
-   '''
-    def getGameState(self):
-        result = np.array
-        listOfMatrices = getAllMatrices(self)
-   '''     
+   
         
     def shiftdown9x9(self, mat):
         return np.append(np.zeros((1,9), dtype=int), mat[0:8,:], 0)
@@ -195,8 +214,176 @@ class GameState():
             curr_state = next_state
 
         
-    #needs to return a numpy array of 209 possible moves, marked by 1 meaning valid and 0 meaning invalid
-    #def findValidMoves(self):
+    def canGoNorth(coord, players, h_walls, v_walls):
+        canGoUpGivenWalls = np.logical_not(np.logical_or(h_walls, shiftleft9x9(h_walls)))
+        # players is matrix with 1s where players are 
+        (i,j) = coord #parse coordinate into two parts
+        if (i<=0):
+            # already at top of board
+            return False
+
+        #i > 0
+        if (players[i-1,j]==0 and canGoUpGivenWalls[i,j]):
+            return True
+        else:
+            return False
+
+
+    def canGoSouth(coord, players, h_walls, v_walls):
+        canGoDownGivenWalls = np.logical_not(np.logical_or(shiftup9x9(h_walls), shiftup9x9(shiftleft9x9(h_walls))))
+        (i,j) = coord
+        if (i>=8):
+            # already at bottom
+            return False
+        # i < 8
+        if (players[i+1, j]==0 and canGoDownGivenWalls[i,j]):
+            return True
+        else:
+            return False
+
+
+    def canGoWest(coord, players, h_walls, v_walls):
+        canGoLeftGivenWalls = np.logical_not(np.logical_or(v_walls, shiftup9x9(v_walls)))
+        (i,j) = coord
+        if (j<=0):
+            # already at left edge
+            return False
+        if (players[i,j-1]==0 and canGoLeftGivenWalls[i,j]):
+            return True
+        else:
+            return False
+
+
+
+    def canGoEast(coord, players, h_walls, v_walls):
+        canGoRightGivenWalls = np.logical_not(np.logical_or(shiftleft9x9(v_walls), shiftleft9x9(shiftup9x9(v_walls))))
+        (i,j) = coord
+        if (j>=8):
+            # already at right edge
+            return False
+        if (players[i, j+1]==0 and canGoRightGivenWalls[i,j]):
+            return True
+        else:
+            return False
+
+
+
+
+
+    # can go two spots north in one turn
+    # only allowed if pawn to north and open one spot beyond 
+    def canGoNorthNorth(coord, players, h_walls, v_walls):
+        (i,j) = coord
+        if (i<=1):
+            # too close to top edge
+            return False
+        if (players[i-1, j]==1 and canGoNorth((i-1,j), players, h_walls, v_walls)):
+            return True
+        else:
+            return False
+
+    def canGoSouthSouth(coord, players, h_walls, v_walls):
+        (i,j) = coord
+        if (i>=7):
+            # too close to bottom
+            return False
+        if (players[i+1, j]==1 and canGoSouth((i+1,j), players, h_walls, v_walls)):
+            return True
+        else:
+            return False
+
+    def canGoWestWest(coord, players, h_walls, v_walls):
+        (i,j) = coord
+        if (j<=1):
+            # too close to left
+            return False
+        if (players[i, j-1]==1 and canGoWest((i,j-1), players, h_walls, v_walls)):
+            return True
+        else:
+            return False   
+
+    def canGoEastEast(coord, players, h_walls, v_walls):
+        (i,j) = coord
+        if (j>=7):
+            # too close to right
+            return False
+        if (players[i, j+1]==1 and canGoEast((i,j+1), players, h_walls, v_walls)):
+            return True
+        else:
+            return False 
+
+
+
+    # only allowed if pawn above with wall above it, or pawn left with walls left of it
+    # this code assume a two player game
+    def canGoNorthWest(coord, players, h_walls, v_walls):
+        canGoLeftGivenWalls = np.logical_not(np.logical_or(v_walls, shiftup9x9(v_walls)))
+        canGoUpGivenWalls = np.logical_not(np.logical_or(h_walls, shiftleft9x9(h_walls)))
+        (i,j) = coord
+
+        if (i<=0 or j<=0):
+            # already at top and/or left edge
+            return False
+        # if pawn above, cannot go NorthNorth due to walls, and pawn above can go west, then true
+        if (players[i-1,j]==1 and not canGoUpGivenWalls[i-1,j] and canGoWest((i-1,j), players, h_walls, v_walls)):
+            return True
+        # if pawn left, cannot go westwest due to walls, and pawn left can go north, then true
+        if (players[i, j-1]==1 and not canGoLeftGivenWalls[i,j-1] and canGoNorth((i, j-1), players, h_walls, v_walls)):
+            return True
+        # anything else is bad
+        return False
+
+    def canGoNorthEast(coord, players, h_walls, v_walls):
+
+        canGoUpGivenWalls = np.logical_not(np.logical_or(h_walls, shiftleft9x9(h_walls)))
+        canGoRightGivenWalls = np.logical_not(np.logical_or(shiftleft9x9(v_walls), shiftleft9x9(shiftup9x9(v_walls))))
+        (i,j) = coord
+        if (i<=0 or j>=8):
+            # already at top and/or right edge
+            return False
+        # if pawn above, cannot go NorthNorth, and pawn above can go east, then true
+        if (players[i-1,j]==1 and not canGoUpGivenWalls[i-1,j] and canGoEast((i-1,j), players, h_walls, v_walls)):
+            return True
+        # if pawn right, cannot go easteast, and pawn right can go north, then true
+        if (players[i, j+1]==1 and not canGoRightGivenWalls[i,j+1] and canGoNorth((i, j+1), players, h_walls, v_walls)):
+            return True
+        # anything else is bad
+        return False
+
+
+    def canGoSouthEast(coord, players, h_walls, v_walls):
+        canGoRightGivenWalls = np.logical_not(np.logical_or(shiftleft9x9(v_walls), shiftleft9x9(shiftup9x9(v_walls))))
+        canGoDownGivenWalls = np.logical_not(np.logical_or(shiftup9x9(h_walls), shiftup9x9(shiftleft9x9(h_walls))))
+        (i,j) = coord
+
+        if (i>=8 or j>=8):
+            # already at bottom and/or right edge
+            return False
+        # if pawn below, cannot go southsouth, and pawn below can go east, then true
+        if (players[i+1,j]==1 and not canGoDownGivenWalls[i+1,j] and canGoEast((i+1,j), players, h_walls, v_walls)):
+            return True
+        # if pawn right, cannot go easteast, and pawn right can go south, then true
+        if (players[i, j+1]==1 and not canGoRightGivenWalls[i,j+1] and canGoSouth((i, j+1), players, h_walls, v_walls)):
+            return True
+        # anything else is bad
+        return False
+
+    def canGoSouthWest(coord, players, h_walls, v_walls):
+        canGoDownGivenWalls = np.logical_not(np.logical_or(shiftup9x9(h_walls), shiftup9x9(shiftleft9x9(h_walls))))
+        canGoLeftGivenWalls = np.logical_not(np.logical_or(v_walls, shiftup9x9(v_walls)))
+        (i,j) = coord
+
+        if (i>=8 or j<=0):
+            # already at bottom and/or left edge
+            return False
+        # if pawn below, cannot go southsouth, and pawn below can go west, then true
+        if (players[i+1,j]==1 and not canGoDownGivenWalls[i+1,j] and canGoWest((i+1,j), players, h_walls, v_walls)):
+            return True
+        # if pawn left, cannot go westwest, and pawn left can go south, then true
+        if (players[i, j-1]==1 and not canGoLeftGivenWalls[i,j-1] and canGoSouth((i, j-1), players, h_walls, v_walls)):
+            return True
+        # anything else is bad
+        return False 
         
     '''
     #figure out how to categorize legal moves
