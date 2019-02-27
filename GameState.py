@@ -385,15 +385,183 @@ class GameState():
         # anything else is bad
         return False 
         
-    '''
-    #figure out how to categorize legal moves
-    def isLegalMove(self):
+    # new code as of 2/24/19 below
+    
+ 
+    def canWinNorth(player, h_walls, v_walls):
+        player_mat = np.zeros((9,9), dtype=int)
+        (i,j)=player
+        player_mat[i,j] = 1
+        reachability = bfs(player_mat, h_walls, v_walls)
+        return np.any(reachability[0, :])
+
+    def canWinSouth(player, h_walls, v_walls):
+        player_mat = np.zeros((9,9), dtype=int)
+        (i,j)=player
+        player_mat[i,j] = 1
+        reachability = bfs(player_mat, h_walls, v_walls)
+        return np.any(reachability[8, :])
+
+    def generateValidNorthPawnMoves(north_player, south_player, h_walls, v_walls):
+        valid_moves = np.zeros((9,9), dtype=int)
+        players = np.zeros((9,9), dtype=int)
+        (ni,nj) = north_player
+        (si,sj) = south_player
+        players[ni,nj] = 1
+        players[si,sj] = 1
+        if (canGoNorth(north_player,players,h_walls,v_walls)):
+            valid_moves[ni-1,nj] = 1
+        if (canGoSouth(north_player,players,h_walls,v_walls)):
+            valid_moves[ni+1,nj] = 1
+        if (canGoWest(north_player,players,h_walls,v_walls)):
+            valid_moves[ni,nj-1] = 1
+        if (canGoEast(north_player,players,h_walls,v_walls)):
+            valid_moves[ni,nj+1] = 1
+        if (canGoNorthWest(north_player,players,h_walls,v_walls)):
+            valid_moves[ni-1,nj-1] = 1
+        if (canGoNorthEast(north_player,players,h_walls,v_walls)):
+            valid_moves[ni-1,nj+1] = 1
+        if (canGoSouthWest(north_player,players,h_walls,v_walls)):
+            valid_moves[ni+1,nj-1] = 1
+        if (canGoSouthEast(north_player,players,h_walls,v_walls)):
+            valid_moves[ni+1,nj+1] = 1
+        if (canGoNorthNorth(north_player,players,h_walls,v_walls)):
+            valid_moves[ni-2,nj] = 1
+        if (canGoSouthSouth(north_player,players,h_walls,v_walls)):
+            valid_moves[ni+2,nj] = 1
+        if (canGoWestWest(north_player,players,h_walls,v_walls)):
+            valid_moves[ni,nj-2] = 1
+        if (canGoEastEast(north_player,players,h_walls,v_walls)):
+            valid_moves[ni,nj+2] = 1
+        return valid_moves 
+
+    def generateValidVertWalls(north_player, south_player, h_walls, v_walls):
+        valid_vwalls = np.zeros((9,9), dtype=int)
+        for i in range(9):
+            for j in range(9):
+                valid_vwalls[i,j]= canPlaceVertWall(i,j,north_player,south_player,h_walls,v_walls)
+        return valid_vwalls
+
+    def generateValidHorizWalls(north_player, south_player, h_walls, v_walls):
+        valid_hwalls = np.zeros((9,9), dtype=int)
+        for i in range(9):
+            for j in range(9):
+                valid_hwalls[i,j]= canPlaceHorizWall(i,j,north_player,south_player,h_walls,v_walls)
+        return valid_hwalls
+
+
+    def canPlaceVertWall(i, j, north_player, south_player, h_walls, v_walls):
+        if (j==0):
+            # left edge of board
+            return False
+        if (h_walls[i,j]==1 or v_walls[i,j]==1):
+            # already wall there
+            return False
+        if (i==0):
+            # top edge
+            return False
+        if (v_walls[i-1,j]==1):
+            return False
+        if (i<8 and v_walls[i+1,j]==1):
+            return False
+        v_wall_copy = np.copy(v_walls)
+        v_wall_copy[i,j] = 1
+        if (not canWinNorth(north_player, h_walls, v_wall_copy)):
+            return False
+        if (not canWinSouth(south_player, h_walls, v_wall_copy)):
+            return False
+        return True 
+
+    def canPlaceHorizWall(i, j, north_player, south_player, h_walls, v_walls):
+        if (j==0):
+            # left edge of board
+            return False
+        if (h_walls[i,j]==1 or v_walls[i,j]==1):
+            # already wall there
+            return False
+        if (i==0):
+            # top edge
+            return False
+        if (h_walls[i,j-1]==1):
+            return False
+        if (j<8 and h_walls[i,j+1]==1):
+            return False
+        h_wall_copy = np.copy(h_walls)
+        h_wall_copy[i,j] = 1
+        if (not canWinNorth(north_player, h_wall_copy, v_walls)):
+            return False
+        if (not canWinSouth(south_player, h_wall_copy, v_walls)):
+            return False
+        return True 
+
+
+    def generateValidMoveVector(north_player, south_player, h_walls, v_walls):
+        pawnMoveMat = generateValidNorthPawnMoves(north_player, south_player, h_walls, v_walls)
+        possibleHorizWallMat = generateValidHorizWalls(north_player, south_player, h_walls, v_walls)
+        possibleVertWallMat = generateValidVertWalls(north_player, south_player, h_walls, v_walls)
+        return np.concatenate((pawnMoveMat.flatten(), possibleHorizWallMat.flatten(), possibleVertWallMat.flatten()))
+
+
+    # todo - create entire board representation as list of matrices
+    # will essentially be 9x9x24= 2 player 9x9 matrices, 20 walls remaining 9x9 matrices, 2 wall 9x9 matrices
+    #order: northPlayer, north walls, south player, south walls, horizontal, vertical
+    def getFullRepresentation(self, north_player, south_player, h_walls, v_walls, north_walls_remaining, south_walls_remaining):
+        finalList = []
+        northMat = np.zeros((9,9), dtype=int)
+        northMat[north_player[0], north_player[1]] = 1
+        finalList.append(northMat)
+
+        for i in range(10):
+            if (north_walls_remaining > i):
+                finalList.append(np.ones((9,9), dtype=int))
+            else:
+                finalList.append(np.zeros((9,9), dtype=int))
+        southMat = np.zeros((9,9), dtype=int)
+        southMat[south_player[0], south_player[1]] = 1
+        finalList.append(southMat)
+
+        for i in range(10):
+            if (south_walls_remaining > i):
+                finalList.append(np.ones((9,9), dtype=int))
+            else:
+                finalList.append(np.zeros((9,9), dtype=int))
+
+        finalList.append(h_walls)
+        finalList.append(v_walls)
+
+        return finalList
+
+
+
+    # todo: horizontal symmetry property: board reflected horizontally is same. 
+    # the code we want to use has a method that takes a board (like our 9x9x24 above) and a vector of moves (like our 243 size vector)
+    # and returns the modified versions after horizontal board flip
+    
+    def getH_WallSymmetries(self):
+        return self.shiftright9x9(np.fliplr(self.getHorizontalWallMatrix()))
         
-    def getAsMatrices(self):
         
-    def getValidMoves(self):
-    '''
-  
-                
+    def getV_WallSymmetries(self):
+        return self.shiftright9x9(np.fliplr(self.getVerticalWallMatrix()))
+
+    def getFullRepSymmetry(self, fullRep):
+        finalList = []
+        #north_player flipped
+        finalList.append(np.fliplr(fullRep[0]))
+        #north_player walls remaining
+        finalList.append(fullRep[1:11])
+        #south_player flipped
+        finalList.append(np.fliplr(fullRep[11]))
+        #south_player walls remaining
+        finalList.append(fullRep[12:22])
+        #horizontal walls
+        finalList.append(self.getH_WallSymmetries())
+        #vertical walls
+        finalList.append(self.getV_WallSymmetries())
+        print(finalList)
+    
+    #takes a flattened vector of 243 values and returns the symmetric representation
+    def validMoveSymmetry(self, validMoves):
+        
         
             
