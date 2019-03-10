@@ -26,22 +26,19 @@ class GameState():
         '''
         self.numPlayerWalls = 10;
         self.numPlayer2Walls = 10;
-        
-    def seeOtherPlayersPerspective(self):
-        return np.rot90(self.getPlayerMatrix(), 2)
-    
-    def seeV_WallsFlipped(self):
+       
+    def seeV_WallsFlipped(self, vertWalls):
         #rotate the existing matrix and shift to the right and then down
-        rot = np.rot90(self.getVerticalWallMatrix(), 2)
+        rot = np.rot90(vertWalls, 2)
         #y = np.argwhere(rot==1)
         #print(y)
         rot = self.shiftright9x9(rot)
         rot = self.shiftdown9x9(rot)
         return rot
     
-    def seeH_WallsFlipped(self):
+    def seeH_WallsFlipped(self,horizWalls):
         #rotate the existing matrix and shift to the right and then down
-        rot = np.rot90(self.getHorizontalWallMatrix(), 2)
+        rot = np.rot90(horizWalls, 2)
         #y = np.argwhere(rot==1)
         #print(y)
         rot = self.shiftright9x9(rot)
@@ -558,7 +555,7 @@ class GameState():
         finalList.append(self.getH_WallSymmetries(fullRep[22]))
         #vertical walls
         finalList.append(self.getV_WallSymmetries(fullRep[23]))
-        print(finalList)
+        return finalList
     
     
     #takes a flattened vector of 243 values and returns the symmetric representation
@@ -571,5 +568,25 @@ class GameState():
         
         # flatten and return
         return np.concatenate((pawn_moves.flatten(), horiz_walls.flatten(), vert_walls.flatten()))
+    
+    def getCannonicalForm(self, fullRep, player):
+        #take in full representation and player and return the correct perspective
+        finalList = []
+        if(player == 1):
+            return fullRep
+        else:
+            #north_player from south perspective
+            finalList.append(np.rot90(fullRep[0], 2))
+            #north_player walls remaining
+            finalList.append(fullRep[1:11])
+            #south_player flipped
+            finalList.append(np.rot90(fullRep[11], 2))
+            #south_player walls remaining
+            finalList.append(fullRep[12:22])
+            #horizontal walls
+            finalList.append(self.seeV_WallsFlipped(fullRep[22]))
+            #vertical walls
+            finalList.append(self.seeH_WallsFlipped(fullRep[23]))
+            return fullRep
         
             
