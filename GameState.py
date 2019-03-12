@@ -575,14 +575,15 @@ class GameState():
         if(player == 1):
             return fullRep
         else:
-            #north_player from south perspective
-            finalList.append(np.rot90(fullRep[0], 2))
-            #north_player walls remaining
-            finalList.append(fullRep[1:11])
+            #South player becomes north player and matrices are rotated 180
             #south_player flipped
             finalList.append(np.rot90(fullRep[11], 2))
             #south_player walls remaining
             finalList.append(fullRep[12:22])
+            #north_player from south perspective
+            finalList.append(np.rot90(fullRep[0], 2))
+            #north_player walls remaining
+            finalList.append(fullRep[1:11])
             #horizontal walls
             finalList.append(self.seeV_WallsFlipped(fullRep[22]))
             #vertical walls
