@@ -398,6 +398,12 @@ class GameState():
         player_mat[i,j] = 1
         reachability = self.bfs(player_mat, h_walls, v_walls)
         return np.any(reachability[8, :])
+    
+    def hasNorthPlayerWon(self, north_player):
+        return np.any(north_player[0,:])
+                      
+    def hasSouthPlayerWon(self, south_player):
+        return np.any(south_player[8,:])
 
     def generateValidNorthPawnMoves(self, north_player, south_player, h_walls, v_walls):
         valid_moves = np.zeros((9,9), dtype=int)
@@ -568,7 +574,58 @@ class GameState():
         
         # flatten and return
         return np.concatenate((pawn_moves.flatten(), horiz_walls.flatten(), vert_walls.flatten()))
-    
+                      
+    def display(self, north_player, south_player, horizontal_walls, vertical_walls, numPlayerWalls, numPlayer2Walls):
+        cols = "abcdefghi"
+        for i in range(0,9):
+            print("")
+            print(str(i+1) + " ", end="")
+            for j in range(0,9):
+                #check vert walls
+                if(vertical_walls[i][j] == 1):
+                    print("|", end="")
+                elif((i != 8) and vertical_walls[i+1][j] == 1):
+                    print("|",end="")
+                else:
+                    print(" ", end="")
+                #check north player
+                
+                if(north_player[i][j] == 1):
+                    print("N",end="")
+                #check south player
+                elif(south_player[i][j] == 1):
+                    print("S",end="")
+                else:
+                    print("O",end="")
+            print("\n   ",end="")
+        
+            for k in range(0,9):
+                printWall = False;
+                if((i != 8) and (k!=8) and horizontal_walls[i+1][k+1] == 1):
+                    print("-", end="")
+                    printWall = True
+                elif((i != 8) and horizontal_walls[i+1][k] == 1):
+                    print("-", end="")
+                    printWall = True  
+            
+                if(printWall == False):
+                    print("  ",end="")
+                else:
+                    print(" ",end="")
+        print("")
+                
+                
+        #print column reference
+        #print("")
+        print("   ", end="")
+        for a in cols:
+            print(a + " ", end="")
+        print("")
+        
+        #print num walls left
+        print("Number of North Player Walls left: " + str(numPlayerWalls))
+        print("Number of South Player Walls left: " + str(numPlayer2Walls))            
+                        
     def getCannonicalForm(self, fullRep, player):
         #take in full representation and player and return the correct perspective
         finalList = []
@@ -589,5 +646,8 @@ class GameState():
             #vertical walls
             finalList.append(self.seeH_WallsFlipped(fullRep[23]))
             return fullRep
-        
+                  
+                      
+                      
+     
             
