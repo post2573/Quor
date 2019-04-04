@@ -13,9 +13,9 @@ class GameState():
         #matrix for vertical walls
         self.v_walls = np.zeros( (9, 9), dtype=int )
         #white pawn tuple
-        self.player = (0,4)
+        self.player = (8,4)
         #black pawn tuple
-        self.player2 = (8,4);
+        self.player2 = (0,4);
 
         #list of player walls (to keep track of how many walls left)
         '''
@@ -163,6 +163,12 @@ class GameState():
         elif(len(playerMove) == 3):
             self.addPlayer2Wall(int(playerMove[1])-1, moveMap[playerMove[0]], playerMove[2])
             
+    def isValidMove(self, playerMove, validMoves):
+        moveMap = {'a':0,'b':1,'c':2,'d':3,'e':4,'f':5,'g':6,'h':7,'i':8}
+        if(validMoves[int(playerMove[1])-1][moveMap[playerMove[0]]] == 1):
+            return True
+        return False
+    
     #needs to return a list of all the numpy arrays           
     def getAllMatrices(self):
         result = []
@@ -204,8 +210,8 @@ class GameState():
             #update right
             next_state = np.logical_or(next_state, self.shiftright9x9(np.logical_and(canGoRight, curr_state)))
 
-            print("next state is ")
-            print(next_state)
+            #print("next state is ")
+            #print(next_state)
             if (np.array_equal(next_state, curr_state)):
                 return next_state*1
             curr_state = next_state
