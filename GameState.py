@@ -7,7 +7,7 @@ import re
 
 class GameState():
     
-    def __init__(self):
+    def __init__(self, n=9):
         #matrix for horiztontal walls
         self.h_walls = np.zeros( (9, 9), dtype=int )
         #matrix for vertical walls
@@ -15,18 +15,14 @@ class GameState():
         #white pawn tuple
         self.player = (8,4)
         #black pawn tuple
-        self.player2 = (0,4);
-
-        #list of player walls (to keep track of how many walls left)
-        '''
-            Each player has a list of 10 wall matrices (all ones). When a wall
-            is used, the matrice will be all zeros. When all the matrices are the
-            zero matrice, the player may not use any more walls. They number of walls left
-            are kept within self. Call getWallMatrices for matrix representation.
-        '''
-        self.numPlayerWalls = 10;
-        self.numPlayer2Walls = 10;
+        self.player2 = (0,4)
+        self.n = n
+        self.numPlayerWalls = 10
+        self.numPlayer2Walls = 10
        
+    def getBoardSize(self):
+        return (self.n, self.n)
+   
     def seeV_WallsFlipped(self, vertWalls):
         #rotate the existing matrix and shift to the right and then down
         rot = np.rot90(vertWalls, 2)
@@ -46,10 +42,10 @@ class GameState():
         return rot
     
     def getNumPlayerWalls(self):
-        return self.numPlayerWalls;
+        return self.numPlayerWalls
     
     def getNumPlayer2Walls(self):
-        return self.numPlayer2Walls;
+        return self.numPlayer2Walls
     
     #output of 10 matrices. Matrices of all 1s mean they exist, Matrices of all 0s means they've been used.
     def getWallMatrices(self, player):
@@ -60,8 +56,8 @@ class GameState():
                     wall = np.ones((9,9), dtype=int)
                     #put 0s where invalid wall placement
                     for j in range(9):
-                        wall[0][j] = 0;
-                        wall[j][0] = 0;
+                        wall[0][j] = 0
+                        wall[j][0] = 0
                     result.append(wall)
                 else:
                     result.append(np.zeros((9,9), dtype=int))
@@ -71,8 +67,8 @@ class GameState():
                     wall = np.ones((9,9), dtype=int)
                     #put 0s where invalid wall placement
                     for j in range(9):
-                        wall[0][j] = 0;
-                        wall[j][0] = 0;
+                        wall[0][j] = 0
+                        wall[j][0] = 0
                     result.append(wall)
                 else:
                     result.append(np.zeros((9,9), dtype=int))
@@ -130,13 +126,13 @@ class GameState():
     def getPlayerMatrix(self):
         white = np.zeros( (9, 9), dtype=int )
         white[self.player[0]][self.player[1]] = 1
-        return white;
+        return white
     
     #returns numpy array of where the black pawn is located
     def getPlayer2Matrix(self):
         black = np.zeros( (9, 9), dtype=int )
         black[self.player2[0]][self.player2[1]] = 1
-        return black;
+        return black
 
     #send in a round of moves (e.g. 1.e8 e2) 
     def makeMoves(self, move):
@@ -510,7 +506,8 @@ class GameState():
         possibleVertWallMat = self.generateValidVertWalls(north_player, south_player, h_walls, v_walls)
         return np.concatenate((pawnMoveMat.flatten(), possibleHorizWallMat.flatten(), possibleVertWallMat.flatten()))
 
-
+    def getActionSize(self):
+        return self.generateValidMoveVector(self.player, self.player2, self.getVerticalWallMatrix(), self.getHorizontalWallMatrix()).size
     # todo - create entire board representation as list of matrices
     # will essentially be 9x9x24= 2 player 9x9 matrices, 20 walls remaining 9x9 matrices, 2 wall 9x9 matrices
     #order: northPlayer, north walls, south player, south walls, horizontal, vertical
@@ -606,7 +603,7 @@ class GameState():
             print("\n   ",end="")
         
             for k in range(0,9):
-                printWall = False;
+                printWall = False
                 if((i != 8) and (k!=8) and horizontal_walls[i+1][k+1] == 1):
                     print("-", end="")
                     printWall = True
