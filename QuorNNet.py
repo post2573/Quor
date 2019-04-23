@@ -17,8 +17,17 @@ class QuorNNet():
         # Neural Net
         #instantiates a Keras tensor (a tensor object from the underlying backend, TensorFlow)
         #Arguments: shape (doesn't include batch size) indicates that the input will be x by y dimensional vectors
-        self.input_boards = Input(shape=(self.board_x, self.board_y))
+        self.input_boards = Input(shape=(self.board_x, self.board_y, 24))
         
-        #Reshapes an output of certain shape, this is the first layer in the model
-        #Arguements: target shape 
-        x_image = Reshape((self.board_x, self.board_y, 1))(self.input_boards)
+        x_image = Reshape((self.board_x, self.board_y, num_encoders))(self.input_boards) #not really necessary, but keeping in here for now
+        h_conv1 = Activation('relu')(BatchNormalization(axis=3)(Conv2D(512, 3, padding='same', use_bias=False)(x_image)))  # batch_size  x board_x x board_y x num_channels
+        h_conv2 = Activation('relu')(BatchNormalization(axis=3)(Conv2D(512, 3, padding='same', use_bias=False)(h_conv1)))  # batch_size  x board_x x board_y x num_channels
+        h_conv3 = Activation('relu')(BatchNormalization(axis=3)(Conv2D(512, 3, padding='valid', use_bias=False)(h_conv2)))  # batch_size  x (board_x-2) x (board_y-2) x num_channels
+        h_conv4 = Activation('relu')(BatchNormalization(axis=3)(Conv2D(512, 3, padding='valid', use_bias=False)(h_conv3)))  # batch_size  x (board_x-4) x (board_y-4) x num_channels
+        h_conv4_flat = Flatten()(h_conv4)
+        s_fc1 = Dropout(CONFIG.nnet_args.dropout)(Activation('relu')(BatchNormalization(axis=1)(Dense(256, use_bias=False)(h_conv4_flat))))  # batch_size x 1024
+        s_fc2 = Dropout(CONFIG.nnet_args.dropout)(Activation('relu')(BatchNormalization(axis=1)(Dense(128, use_bias=False)(s_fc1))))  # batch_size x 1024
+        self.pi = Dense(self.action_size, activation='softmax', name='pi')(s_fc2)  # batch_size x self.action_size
+        self.v = Dense(1, activation='tanh', name='v')(s_fc2)  # batch_size x 1
+
+        self.model = Model(inputs=self.input_boards, outputs=[self.pi, self.v])        
