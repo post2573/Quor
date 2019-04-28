@@ -165,16 +165,22 @@ class GameState():
             return True
         return False
     
-    #needs to return a list of all the numpy arrays           
+    #needs to return a stack of all the numpy arrays           
     def getAllMatrices(self):
         result = []
         result.append(self.getPlayerMatrix())
         result.append(self.getPlayer2Matrix())
         result.append(self.getVerticalWallMatrix())
         result.append(self.getHorizontalWallMatrix())
-        result.append(self.getWallMatrices(1))
-        result.append(self.getWallMatrices(2))
-        return result
+        a = self.getWallMatrices(1)
+        for x in a:
+            result.append(x)
+        b = self.getWallMatrices(2)
+        for y in b:
+            result.append(y)
+        final = np.stack(result)
+        #NEED TO FIGURE OUT HOW TO GET WALL MATRICES IN STACK
+        return final
    
         
     def shiftdown9x9(self, mat):
