@@ -23,6 +23,18 @@ class GameState():
     def getBoardSize(self):
         return (self.n, self.n)
    
+    def getNextState(self, player, move):
+        #check if move is valid
+        if(!isValidMove(self, playerMove, validMoves)):
+            return (self.getAllMatrices(), player*-1)
+        #make move and return board and next player
+        if(player == 1):
+            self.findPlayerMove(move)
+            return (self.getAllMatrices(), -1)
+        else:
+            self.findPlayer2Move(move)
+            return (self.getAllMatrices(), 1)
+        
     def seeV_WallsFlipped(self, vertWalls):
         #rotate the existing matrix and shift to the right and then down
         rot = np.rot90(vertWalls, 2)
@@ -179,7 +191,6 @@ class GameState():
         for y in b:
             result.append(y)
         final = np.stack(result)
-        #NEED TO FIGURE OUT HOW TO GET WALL MATRICES IN STACK
         return final
    
         
@@ -541,7 +552,7 @@ class GameState():
         finalList.append(h_walls)
         finalList.append(v_walls)
 
-        return finalList
+        return np.stack(finalList)
 
 
 
